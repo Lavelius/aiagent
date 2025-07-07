@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import sys
 verbose = '--verbose' in sys.argv
-system_prompt = system_prompt = """
+system_prompt = """
 You are a helpful AI coding agent.
 
 When a user asks a question or makes a request, make a function call plan. You can perform the following operations:
@@ -28,6 +28,7 @@ from functions.get_files_info import schema_get_files_info
 from functions.get_file_content import schema_get_file_content
 from functions.write_file import schema_write_file
 from functions.run_python import schema_run_python
+from functions.call_function import call_function
 available_functions = types.Tool(
     function_declarations=[
         schema_get_files_info,
@@ -56,6 +57,9 @@ def main():
 
     if hasattr(response, 'function_calls') and response.function_calls:
         for function_call in response.function_calls:
+            tool_response = call_function(function_call, verbose=verbose)
+            if verbose:
+                print(f"-> {tool_response.parts[0].function_response.response}")
             print(f"\nCalling function: {function_call.name}({function_call.args})")
     print(f"Grandmaster Senpai AI Chatbot: {response.text}")
 
